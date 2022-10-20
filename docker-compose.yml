@@ -10,25 +10,25 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-  crawler:
-    build:
-      context: config/crawler
-      dockerfile: Dockerfile
-    working_dir: /app
-    volumes:
-      - rerun-crawler-node-modules:/app/node_modules
-      - ./:/app
-    links:
-      - postgres
-    environment:
-      DB_NAME: postgres
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_HOST: postgres
-      DB_PORT: 5432
-      WORKERS_COUNT: 100
-      BREADS_TO_PROCESS: JE
-      ENV: dev
+  # crawler:
+  #   build:
+  #     context: config/crawler
+  #     dockerfile: Dockerfile
+  #   working_dir: /app
+  #   volumes:
+  #     - rerun-crawler-node-modules:/app/node_modules
+  #     - ./:/app
+  #   links:
+  #     - postgres
+  #   environment:
+  #     DB_NAME: postgres
+  #     DB_USER: postgres
+  #     DB_PASSWORD: postgres
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     WORKERS_COUNT: 100
+  #     BREADS_TO_PROCESS: JE
+  #     ENV: dev
   api:
     build:
       context: config/api

@@ -20,6 +20,12 @@ const BullData = BullDataModel(sequelize, Sequelize)
 Bull.hasMany(BullData, { foreignKey: 'bullId' })
 BullData.belongsTo(Bull, { foreignKey: 'bullId' })
 
+Bull.hasMany(Bull, { foreignKey: 'fatherId' })
+Bull.hasOne(Bull, { foreignKey: 'fatherId' })
+
+Bull.hasMany(Bull, { foreignKey: 'grandFatherId' })
+Bull.hasOne(Bull, { foreignKey: 'grandFatherId' })
+
 const Models = { Bull, BullData, sequelize }
 const connection = {}
 

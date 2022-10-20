@@ -50,7 +50,7 @@ exports.getPageBullsData = async (libsMilk, bread) => {
   return rowsContent.filter(row => row['Lbs. Milk'] && isNaN(Number(row['Lbs. Milk'])) === false)
 }
 
-exports.getAllBullsData = async (bread, filter = 5000) => {
+exports.getAllBullsData = async (bread, filter = -16) => {
   console.log('GETTING DATA FOR MILK <', filter)
   const pageData = await this.getPageBullsData(filter, bread)
   const filteredData = pageData.map(item => (item && item['Interbull ID']) ? { id: item['Interbull ID'], name: item.Name, bread } : 'NONE')

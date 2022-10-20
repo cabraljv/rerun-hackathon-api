@@ -1,6 +1,7 @@
 const connectToDatabase = require('../utils/db')
 const dairybullsService = require('./dairybulls')
 const { insertBullData } = require('./bullData')
+const {Op} = require('sequelize')
 
 exports.updateBullStatus = async (bullId, status) => {
   const { Bull } = await connectToDatabase()
@@ -31,29 +32,37 @@ exports.insertBulls = async (bulls) => {
   }
 }
 
-exports.getAllBulls = async (page, limit) => {
+exports.getAllBulls = async (page, limit, notGen, name, percent) => {
   const { Bull, BullData } = await connectToDatabase()
   const processedBulls = await Bull.findAll({
-    offset: page * limit,
-    limit,
+    where:{
+        id: {
+            [Op.in]: ['840M003209774579','840M003218042459','840M003218042425','840M003200644037']
+        }
+    },
     order: [['status', 'DESC']],
-    include: [{ model: BullData }]
   })
-  const returnBulls = processedBulls.map(bull => {
-    const obj = {}
-    obj.id = bull.id
-    obj.name = bull.name
-    obj.status = bull.status
-    obj.bread = bull.bread
-    if (bull.bullData) {
-      for (const data of bull.bullData) {
-        obj[data.type] = data.value
-      }
+  console.log(processedBulls.length)
+  let validBulls = []
+  for (const bull of processedBulls) {
+    const father1 = await this.getSingleBull(bull.fatherId)
+    const father2 = await this.getSingleBull(father1.sire)
+    const father3 = await this.getSingleBull(father2.sire)
+    const fatherGrandfather = await this.getSingleBull(father1.mgs)
+    const mgs1 = await this.getSingleBull(bull.grandFatherId)
+    const mgsFather = await this.getSingleBull(mgs1.sire)
+    const ids = [bull.id, father1.id, father2.id, father3.id, fatherGrandfather.id, mgs1.id, mgsFather.id]
+    const existentIds = ids.filter(id => notGen.includes(id))
+    if(!ids.some(id => notGen.includes(id))){
+      const bullData = await this.getSingleBull(bull.id)
+      validBulls.push(bullData)
     }
-    return obj
-  })
+  }
 
-  return returnBulls
+
+  return validBulls
+  
+
 }
 
 exports.getSingleBull = async (bullId) => {
