@@ -1,32 +1,6 @@
-const { updateBullStatus, getCreatedBulls, updateBull } = require('../services/bull')
-const { insertBullData } = require('../services/bullData')
-const { getSingleBullData } = require('../services/dairybulls')
+const { getCreatedBulls, processBull } = require('../services/bull')
 
 exports.initWorker = async () => {
-  const processBull = async (bull) => {
-    await updateBullStatus(bull.id, 'PROCESSING')
-    try {
-      const bullData = await getSingleBullData(bull.id, bull.bread)
-      const dataToInsert = Object.keys(bullData)
-        .map(key => (
-          {
-            id: `${key}_${bull.id}`,
-            type: key,
-            value: bullData[key],
-            bullId: bull.id
-          }))
-      await insertBullData(dataToInsert)
-      await updateBull({
-        id: bull.id,
-        status: 'PROCESSED',
-        grandFatherId: bullData.mgs,
-        fatherId: bullData.sire
-      })
-    } catch (error) {
-      console.log('ERROR PROCESSING', bull.id)
-      await updateBullStatus(bull.id, 'ERROR')
-    }
-  }
   const proccessList = await getCreatedBulls()
   let index = 0
   const createProcessWorker = async () => {

@@ -26,10 +26,31 @@ services:
       DB_PASSWORD: postgres
       DB_HOST: postgres
       DB_PORT: 5432
-      WORKERS_COUNT: 300
+      WORKERS_COUNT: 100
       BREADS_TO_PROCESS: JE
+      ENV: dev
+  api:
+    build:
+      context: config/api
+      dockerfile: Dockerfile
+    working_dir: /app
+    ports: 
+    - '3000:3000'  
+    volumes:
+      - rerun-api-node-modules:/app/node_modules
+      - ./:/app
+    links:
+      - postgres
+    environment:
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      PORT: 3000
       ENV: dev
   
 volumes:
     rerun-crawler-node-modules:
+    rerun-api-node-modules:
 

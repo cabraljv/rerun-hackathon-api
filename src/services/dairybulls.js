@@ -6,6 +6,7 @@ const { insertBulls } = require('./bull')
 
 exports.getSingleBullData = async (bullId, bre) => {
   const queryUrl = `${SINGLE_BULL_SEARCH_URL}?InterbullID=${bullId}&Bre=${bre}&genbase=A`
+  console.log('GETTING DATA FOR BULL', queryUrl)
   const { data } = await axios.get(queryUrl)
 
   const pageRoot = parse(data.replace(/<A/g, '<a'))
