@@ -1,5 +1,6 @@
 const connectToDatabase = require('../utils/db')
-const { getSingleBullData } = require('./dairybulls')
+const dairybullsService = require('./dairybulls')
+const { insertBullData } = require('./bullData')
 
 exports.updateBullStatus = async (bullId, status) => {
   const { Bull } = await connectToDatabase()
@@ -36,18 +37,16 @@ exports.getAllBulls = async (page, limit) => {
     offset: page * limit,
     limit,
     order: [['status', 'DESC']],
-    includes: [{ model: BullData }]
+    include: [{ model: BullData }]
   })
   const returnBulls = processedBulls.map(bull => {
     const obj = {}
     obj.id = bull.id
     obj.name = bull.name
     obj.status = bull.status
-    obj.grandFatherId = bull.grandFatherId
     obj.bread = bull.bread
-    obj.fatherId = bull.fatherId
-    if (bull.bullDatas) {
-      for (const data of bull.bullDatas) {
+    if (bull.bullData) {
+      for (const data of bull.bullData) {
         obj[data.type] = data.value
       }
     }
@@ -63,18 +62,16 @@ exports.getSingleBull = async (bullId) => {
     where: {
       id: bullId
     },
-    includes: [{ model: BullData }]
+    include: [{ model: BullData }]
   })
   if (!bull) throw new Error('Bull not found')
   const obj = {}
   obj.id = bull.id
   obj.name = bull.name
   obj.status = bull.status
-  obj.grandFatherId = bull.grandFatherId
   obj.bread = bull.bread
-  obj.fatherId = bull.fatherId
-  if (bull.bullDatas) {
-    for (const data of bull.bullDatas) {
+  if (bull.bullData) {
+    for (const data of bull.bullData) {
       obj[data.type] = data.value
     }
   }
@@ -84,7 +81,7 @@ exports.getSingleBull = async (bullId) => {
 exports.processBull = async (bull) => {
   await this.updateBullStatus(bull.id, 'PROCESSING')
   try {
-    const bullData = await getSingleBullData(bull.id, bull.bread)
+    const bullData = await dairybullsService.getSingleBullData(bull.id, bull.bread)
     const dataToInsert = Object.keys(bullData)
       .map(key => (
         {
@@ -93,7 +90,7 @@ exports.processBull = async (bull) => {
           value: bullData[key],
           bullId: bull.id
         }))
-    await this.insertBullData(dataToInsert)
+    await insertBullData(dataToInsert)
     await this.updateBull({
       id: bull.id,
       status: 'PROCESSED',
@@ -101,7 +98,7 @@ exports.processBull = async (bull) => {
       fatherId: bullData.sire
     })
   } catch (error) {
-    console.log('ERROR PROCESSING', bull.id)
+    console.log('ERROR PROCESSING', bull.id, error)
     await this.updateBullStatus(bull.id, 'ERROR')
   }
 }
